@@ -1,1 +1,3 @@
-# shortyfi
+# Shortify
+
+Un URL shortener distribuido
