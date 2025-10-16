@@ -1,24 +1,31 @@
-# Etapa 1: construir el jar usando Maven
-FROM maven:3.9.6-eclipse-temurin-11 AS build
-WORKDIR /app
+# Etapa 1: Descargamos la imágen base del contenedor (Java 17 + Maven 3.9.6)
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 
-# Copiamos el pom y las dependencias primero (para cachear)
+# Etapa 2: Descargamos dependencias
+# (1) Nos establecemos en el directorio app
+WORKDIR /app
+# (2) copiamos el pom 
 COPY pom.xml .
+# (3) descargamos todas las dependencias
 RUN mvn dependency:go-offline
 
-# Copiamos el resto del código y lo construimos en el jar
+# Etapa 3: Construimos el ejecutable .jar
+# (1) copiamos el resto del código
 COPY src ./src
-RUN mvn clean pakage -DskipTests
+# (2) Limpia el proyecto, compilalo y empaquetalo, pero omitiendo correr pruebas
+RUN mvn clean package -DskipTests
 
-# Etapa 2: Imágen final solo con el jar
+# Etapa 4: Descargamos una imágen nueva "ligera" (solo Java 17)
 FROM eclipse-temurin:17-jdk-jammy
-WORKDIR /app
 
-# Copiamos el jar generado desde la etapa anterior
+# Etapa 5: Traemos el archivo jar
+# (1) Nos establecemos en el directorio app 
+WORKDIR /app
+# (2) Copiamos el jar generado en la etapa de build 
 COPY --from=build /app/target/*.jar app.jar
 
-# Puerto por el que expone Spring Boot
+# Etapa 6: Configuramos el contenedor
+# (1) exponemos un puerto para la app 
 EXPOSE 8080
-
-# Comando que se ejecuta al iniciar el contenedor
+# (2) Definimos el comando principal que se ejecuta cuando se levanta el contenedor
 ENTRYPOINT [ "java", "-jar", "app.jar" ]
