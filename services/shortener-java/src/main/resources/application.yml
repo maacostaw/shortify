@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/urlshortener
-    username: postgres
-    password: 12345
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
@@ -13,4 +13,4 @@ spring:
     name: shortener-service
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
